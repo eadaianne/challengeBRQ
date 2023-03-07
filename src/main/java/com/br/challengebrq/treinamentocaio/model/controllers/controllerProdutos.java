@@ -10,9 +10,11 @@ import java.util.List;
 public class controllerProdutos {
 
     private final RepositoryProduto repositoryProduto;
+    //  private final produtoMapper produtoMapper;
 
     public controllerProdutos(RepositoryProduto repositoryProduto) {
         this.repositoryProduto = repositoryProduto;
+//        this.produtoMapper = produtoMapper;
     }
 
     @PostMapping
@@ -21,7 +23,8 @@ public class controllerProdutos {
     }
 
     @GetMapping
-    public List<Produto> listar() {
-        return repositoryProduto.findAll();
+    public List<ProdutoResumo> listar() {
+        List<Produto> produtos = repositoryProduto.findAll();
+        return produtoMapper.toDtoResumo(produtos);
     }
 }
