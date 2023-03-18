@@ -1,4 +1,4 @@
-package com.br.challengebrq.treinamentocaio.model.controllers;
+package com.br.challengebrq.treinamentocaio.produto;
 //
 //import org.springframework.stereotype.Component;
 //
