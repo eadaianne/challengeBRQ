@@ -5,11 +5,14 @@ import com.br.challengebrq.treinamentocaio.produto.Produto;
 import com.br.challengebrq.treinamentocaio.produto.ProdutoAtualizacao;
 import com.br.challengebrq.treinamentocaio.produto.ProdutoResumo;
 import com.br.challengebrq.treinamentocaio.produto.produtoMapper;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/challengebrq/v1/produtos")
@@ -26,8 +29,12 @@ public class controllerProdutos {
     @PostMapping
     @Transactional
     public Produto cadastrar(@RequestBody Produto produto) {
+        if (produto.getPreco() < 0) {
+            throw new RuntimeException("Preço do produto inválido.");
+        }
+        repositoryProduto.findByNome(produto.getNome()).ifPresent(prod -> {throw new RuntimeException("Nome do produto duplicado.");});
         return repositoryProduto.save(produto);
-    }
+        }
 
     @GetMapping
     public List<ProdutoResumo> listar() {
@@ -40,18 +47,24 @@ public class controllerProdutos {
         return repositoryProduto.findById(id).orElseThrow(() -> new RuntimeException("Produto não existe!"));
         }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @Transactional
-    public void atualizar(@RequestBody ProdutoAtualizacao produtoAtualizado){
-        var produto = repositoryProduto.getReferenceById(produtoAtualizado.id);
+    public Produto atualizar(@PathVariable String id, @RequestBody ProdutoAtualizacao produtoAtualizado){
+        var produto = repositoryProduto.findById(id).orElseThrow(() -> new RuntimeException("Produto não existe!"));
         produto.atualizarInformacoes(produtoAtualizado);
+        repositoryProduto.save(produto);
+        return produto;
     }
 
     @DeleteMapping("/{id}")
     @Transactional
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable String id){
-        repositoryProduto.findById(id);
+        var produto = repositoryProduto.findById(id).orElseThrow(() -> new RuntimeException("Produto não existe!"));
+        if(produto.isAtivo()) {
+            throw new RuntimeException("Produto está ativo.");
+        }
         repositoryProduto.deleteById(id);
     }
-}
 
+}

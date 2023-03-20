@@ -1,5 +1,6 @@
 package com.br.challengebrq.treinamentocaio.produto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -7,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Produto {
 
     @Id
